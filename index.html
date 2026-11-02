@@ -36,6 +36,19 @@
         -webkit-font-smoothing: antialiased;
         overscroll-behavior-y: none;
         background-color: #f8fafc;
+        /* Proteksi: Mencegah seleksi teks */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Pengecualian agar kolom input tetap bisa diisi */
+    input, textarea, select {
+        -webkit-user-select: auto;
+        -moz-user-select: auto;
+        -ms-user-select: auto;
+        user-select: auto;
     }
 
     /* Latar Belakang: Pola PCB Modern & Halus */
@@ -854,6 +867,41 @@
 
   <!-- JAVASCRIPT -->
   <script>
+    // ==========================================
+    // SISTEM PROTEKSI KODE (ANTI-INSPECT, COPY, & TAMPER)
+    // ==========================================
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    
+    // Mencegah copy/paste/drag melalui mouse/ekstensi (di luar input)
+    document.addEventListener('copy', event => { if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) event.preventDefault(); });
+    document.addEventListener('cut', event => { if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) event.preventDefault(); });
+    document.addEventListener('dragstart', event => event.preventDefault());
+    document.addEventListener('drop', event => event.preventDefault());
+
+    document.onkeydown = function(e) {
+        // Deteksi apakah yang sedang aktif adalah kolom input/textarea
+        const isInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName);
+        
+        // Blokir Inspeksi / Save / Print
+        if (e.keyCode === 123 || // F12
+           (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 67 || e.keyCode === 74)) || // Ctrl+Shift+I/C/J
+           (e.ctrlKey && e.keyCode === 85) || // Ctrl+U (View Source)
+           (e.ctrlKey && e.keyCode === 83) || // Ctrl+S (Save Page)
+           (e.ctrlKey && e.keyCode === 80)) { // Ctrl+P (Print)
+            return false;
+        }
+
+        // Blokir shortcut Copy & Select All jika di luar kolom input
+        if (!isInput && e.ctrlKey && (e.keyCode === 65 || e.keyCode === 67)) {
+            return false;
+        }
+    };
+    
+    // Debugger trap untuk membekukan developer tools jika dipaksa buka
+    setInterval(function() {
+        try { (function() { return false; }['constructor']('debugger')()); } catch (err) {}
+    }, 1000);
+
     // ==========================================
     // DICTIONARY LENGKAP UNTUK MULTI-BAHASA
     // ==========================================
